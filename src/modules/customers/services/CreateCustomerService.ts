@@ -12,10 +12,23 @@ interface IRequest {
 
 @injectable()
 class CreateCustomerService {
-  constructor(private customersRepository: ICustomersRepository) {}
+  constructor(
+    @inject('CustomersRepository')
+    private customersRepository: ICustomersRepository,
+  ) { } // eslint-disable-line
 
   public async execute({ name, email }: IRequest): Promise<Customer> {
-    // TODO
+    const checkCustomer = await this.customersRepository.findByEmail(email);
+
+    if (checkCustomer) {
+      throw new AppError('This e-mail is alredy registered.');
+    }
+    const custumer = await this.customersRepository.create({
+      email,
+      name,
+    });
+
+    return custumer;
   }
 }
 
